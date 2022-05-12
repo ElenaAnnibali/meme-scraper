@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-// import https from 'node:https';
+import https from 'node:https';
 import fetch from 'node-fetch';
 
 // Step 1. Fetch url
@@ -21,7 +21,7 @@ while ((image = rex.exec(urlString))) {
   images.push(image[1]);
 }
 
-// const urlImgaes = images.slice(0, 10);
+const urlImages = images.slice(0, 10);
 
 // step 3. create new memes directory
 const path = './memes';
@@ -39,3 +39,24 @@ fs.access(path, (error) => {
     console.log('Error: existing directory. Change new directory name');
   }
 });
+
+// step 4. looping through the array
+for (let i = 0; i < urlImages.length; i++) {
+  if (i < 10) {
+    https
+      .get(urlImages[i], (res) => {
+        const imgPath = `./memes/0${i + 1}.jpg`;
+        const stream = fs.createWriteStream(imgPath);
+
+        res.pipe(stream);
+
+        stream.on('finish', () => {
+          stream.close();
+          console.log('Image successfully downloaded');
+        });
+      })
+      .on('error', (err) => {
+        console.log(err);
+      });
+  }
+}
